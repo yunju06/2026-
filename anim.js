@@ -29,7 +29,7 @@
   // ----- 결승타 문장 해석 -----
   function parse(g) {
     const n = (g.notes || []).find((x) => x.how === "결승타");
-    if (!n) return null;
+    if (!n || !n.result.includes("(")) return null; // "없음" 등 기록 없는 경우
     const text = n.result;
     const m = text.match(/^(.+?)\((\d+)회\s*(무사|[12]사)\s*(만루|[123](?:,[123])*루)?서\s*(.+)\)$/);
     const out = { text, name: text.split("(")[0], inning: null, outs: 0, runners: [], detail: text };
@@ -77,9 +77,33 @@
     return g;
   }
 
+  // 결승타 기록이 없을 때: 이닝별 득점으로 결승 득점 상황을 글로 설명
+  function winningRunText(g) {
+    const ta = g.total.away.r, th = g.total.home.r;
+    if (ta === th) return "무승부 경기라 결승 득점이 없습니다.";
+    const w = ta > th ? "away" : "home", l = w === "away" ? "home" : "away";
+    const need = g.total[l].r + 1;
+    let cumW = 0, k = -1;
+    for (let i = 0; i < g.inning[w].length; i++) { cumW += g.inning[w][i] || 0; if (cumW >= need) { k = i; break; } }
+    if (k < 0) return "결승 득점 상황 정보가 없습니다.";
+    const inn = k + 1;
+    // 그 이닝에 나온 실책/폭투/보크/포일이 있으면 원인으로 표시
+    let cause = "";
+    for (const n of g.notes || []) {
+      if (!/^(실책|폭투|보크|포일)$/.test(n.how) || cause) continue;
+      const re = /([가-힣A-Za-z]+)\d*\(([^)]*)\)/g;
+      let m;
+      while ((m = re.exec(n.result))) {
+        if ((m[2].match(/\d+/g) || []).map(Number).includes(inn)) { cause = `${m[1]} ${n.how}`; break; }
+      }
+    }
+    const T = TEAMS();
+    return `<b>결승 득점 상황</b><br>${inn}회${w === "away" ? "초" : "말"}${cause ? ` (${cause})` : ""} ${T[g[w]].short} ${g.inning[w][k]}점 득점`;
+  }
+
   function mount(box, g) {
     const info = parse(g);
-    if (!info) { box.innerHTML = ""; return; }
+    if (!info) { box.innerHTML = `<div class="card play-card"><div class="play-text">${winningRunText(g)}</div></div>`; return; }
     const side = findSide(g, info.name);
     const bat = TEAMS()[g[side]], fld = TEAMS()[g[side === "home" ? "away" : "home"]];
     const player = (g.batters[side] || []).find((b) => b.name === info.name);

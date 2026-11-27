@@ -221,3 +221,6 @@ tr.subrow td { background: #fcfcfe; }
 .play-who .pp-team { font-size: 10px; }
 .play-msg { left: auto !important; right: 8px; bottom: 8px; transform: none !important; white-space: normal !important; width: 120px; padding: 6px 8px !important; font-size: 11px !important; }
 .pm-big { font-size: 16px !important; }
+
+.play-text { text-align: center; font-size: 14px; line-height: 1.6; color: #14182b; padding: 4px 6px; }
+.play-text small { color: #888; }
