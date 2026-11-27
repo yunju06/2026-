@@ -329,7 +329,146 @@
       return finish(id, n, info.detail);
     }
 
+    // ===== 만루홈런 대축제 =====
+    function celebrate(id) {
+      const box2 = document.createElement("div");
+      box2.className = "gs";
+      const em = ["🎉", "🎊", "✨", "🔥", "🥳", "⚾", "👏", "🏆", "🎆", "💥", "🙌", "🎇", "⭐", "🌟", "💫", "🎈", "🪅", "🏏", "🔔", "📣"];
+      const R = (a, b) => a + Math.random() * (b - a);
+      let h = '<div class="gs-flash"></div><div class="gs-strobe"></div><div class="gs-strobe2"></div><div class="gs-white"></div>';
+      // 반짝반짝 별빛
+      for (let k = 0; k < 40; k++) h += `<span class="gs-sp" style="left:${R(0, 100).toFixed(1)}%;top:${R(0, 100).toFixed(1)}%;animation-delay:${R(0, 1.2).toFixed(2)}s;font-size:${Math.floor(R(10, 26))}px">${k % 3 ? "✨" : "⭐"}</span>`;
+      // 폭죽 + 불꽃
+      for (let b = 0; b < 14; b++) {
+        const bx = R(8, 92), by = R(6, 62), hue = Math.floor(R(0, 360)), dl = (b * 0.32).toFixed(2), big = b % 3 === 0;
+        h += `<div class="gs-fw" style="left:${bx.toFixed(1)}%;top:${by.toFixed(1)}%">`;
+        const n = big ? 26 : 18;
+        for (let k = 0; k < n; k++) {
+          const a = (k / n) * Math.PI * 2, r = (big ? 70 : 48) + R(0, 40);
+          h += `<i style="--dx:${(Math.cos(a) * r).toFixed(0)}px;--dy:${(Math.sin(a) * r).toFixed(0)}px;background:hsl(${(hue + k * 11) % 360},100%,62%);animation-delay:${dl}s"></i>`;
+        }
+        h += "</div>";
+      }
+      // 사방으로 날아다니는 이모지
+      for (let k = 0; k < 46; k++) {
+        const x0 = k % 2 ? -12 : 108, x1 = k % 2 ? 108 : -12;
+        h += `<span class="gs-fly" style="--x0:${x0}%;--y0:${R(-10, 100).toFixed(0)}%;--x1:${x1}%;--y1:${R(-10, 100).toFixed(0)}%;--r:${Math.floor(R(-720, 720))}deg;animation-duration:${R(2.2, 4.6).toFixed(2)}s;animation-delay:${R(0, 3).toFixed(2)}s;font-size:${Math.floor(R(20, 44))}px">${em[k % em.length]}</span>`;
+      }
+      // 이모지 비
+      for (let k = 0; k < 40; k++) h += `<span class="gs-c" style="left:${R(0, 100).toFixed(1)}%;animation-delay:${R(0, 2.4).toFixed(2)}s;animation-duration:${R(1.8, 3.6).toFixed(2)}s;font-size:${Math.floor(R(16, 36))}px">${em[k % em.length]}</span>`;
+      // 바닥에서 타오르는 불꽃
+      h += '<div class="gs-fire">' + Array.from({ length: 14 }, (_, k) => `<span style="animation-delay:${(k * 0.11).toFixed(2)}s">🔥</span>`).join("") + "</div>";
+      h += `<div class="gs-t"><span class="gs-side">🎆</span> 만루홈런!!! <span class="gs-side">🎆</span><small>${info.name} 선수 만루포 폭발!</small></div>`;
+      box2.innerHTML = h;
+      stage.appendChild(box2);
+      partyPlayers(id);
+    }
+
+    function cheerleader(color) {
+      const g2 = document.createElementNS(NS, "g");
+      g2.innerHTML = `<g transform="scale(1.1)">
+        <ellipse rx="8" ry="2.6" fill="rgba(0,0,0,.25)"/>
+        <rect x="-4.5" y="-10" width="3" height="10" fill="#f6d3b0"/><rect x="1.5" y="-10" width="3" height="10" fill="#f6d3b0"/>
+        <path d="M-9.5 -9 L9.5 -9 L5 -18 L-5 -18Z" fill="#fff" stroke="${color}" stroke-width="1.5"/>
+        <rect x="-5.5" y="-27" width="11" height="10" rx="3" fill="${color}" stroke="rgba(255,255,255,.55)" stroke-width=".7"/>
+        <circle cx="8" cy="-31" r="3.2" fill="#5a3a22"/>
+        <circle cy="-32" r="6" fill="#f6d3b0"/><path d="M-6.5 -33 A6.5 6.5 0 0 1 6.5 -33 Z" fill="#5a3a22"/>
+        <rect x="-3.2" y="-33.6" width="6.4" height="2" rx="1" fill="#ff5fa2"/>
+      </g>`;
+      const mk = (c) => { const e = document.createElementNS(NS, "g"); e.innerHTML = `<circle r="6" fill="${c}"/><circle r="3.4" fill="#fff" opacity=".7"/>`; g2.appendChild(e); return e; };
+      g2._pl = mk("#ff4d94"); g2._pr = mk("#ffd400");
+      return g2;
+    }
+
+    // 선수들이 우르르 나와서 날아다니고, 홈런 친 타자는 헹가래로 날아다니며, 방망이·공이 날고, 치어리더가 춤춘다
+    function partyPlayers(id) {
+      const R = (a, b) => a + Math.random() * (b - a);
+      const tagOf = (txt, y, size, fill) => {
+        const t = document.createElementNS(NS, "text");
+        t.setAttribute("y", y); t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", size); t.setAttribute("font-weight", "900");
+        t.setAttribute("fill", fill); t.setAttribute("stroke", "rgba(0,0,0,.8)"); t.setAttribute("stroke-width", "3"); t.setAttribute("paint-order", "stroke");
+        t.textContent = txt; return t;
+      };
+      const spots = [[150, 326], [178, 340], [234, 340], [262, 326], [124, 342], [288, 342], [206, 334]];
+      const crowd = spots.map((sp, k) => {
+        const p = add(person(bat.color, 1.1));
+        place(p, k % 2 ? 392 : 8, 346);
+        return { p, sp, ph: R(0, 6), sp2: R(7, 11), next: R(1.2, 2.2) };
+      });
+      // 날아다니는 선수들
+      const flyers = Array.from({ length: 5 }, (_, k) => {
+        const p = add(person(bat.color, 1.1));
+        place(p, -30, -30);
+        return { p, a: R(0.7, 1.3), b: R(1.0, 1.7), ph: R(0, 6), q: R(0, 6), sgn: k % 2 ? 1 : -1, cx: R(150, 250), cy: R(120, 200) };
+      });
+      // 만루홈런 친 타자 (헹가래)
+      const star = add(person(bat.color, 1.35));
+      star.appendChild(tagOf(info.name, -50, 13, "#ffd400"));
+      place(star, 200, 346);
+      // 치어리더
+      const lefts = [[28, 320], [56, 336], [84, 322]], rights = [[372, 320], [344, 336], [316, 322]];
+      const cheers = [...lefts.map((sp) => ({ sp, from: -24 })), ...rights.map((sp) => ({ sp, from: 424 }))].map((c, k) => {
+        const e = add(cheerleader(k % 2 ? "#ff4d94" : bat.color));
+        place(e, c.from, c.sp[1]);
+        return { e, sp: c.sp, from: c.from, ph: R(0, 6) };
+      });
+      const balls = [];
+      const mkBall = () => {
+        const b = add(document.createElementNS(NS, "g"));
+        b.innerHTML = `<circle r="8" fill="rgba(255,235,0,.5)"/><circle r="4.8" fill="#fff" stroke="#111" stroke-width="1.3"/><path d="M-2.6 -3.3 Q0 0 -2.6 3.3 M2.6 -3.3 Q0 0 2.6 3.3" fill="none" stroke="#e5143a" stroke-width="1.1"/>`;
+        return b;
+      };
+      const mkBat = () => {
+        const b = add(document.createElementNS(NS, "g"));
+        b.innerHTML = `<line x1="0" y1="-15" x2="0" y2="13" stroke="#d9a35b" stroke-width="4.2" stroke-linecap="round"/><line x1="0" y1="-15" x2="0" y2="-7" stroke="#b9772f" stroke-width="5" stroke-linecap="round"/><circle cy="14" r="2.6" fill="#8a5a23"/>`;
+        return b;
+      };
+      const t0 = performance.now();
+      let seg = { i: 0, j: 1, t: 0 }, last = 0.9;
+      (function loop(now) {
+        if (id !== run || !box.isConnected) return;
+        const t = (now - t0) / 1000;
+        crowd.forEach((c) => {
+          const k = Math.min(1, t / 0.9), e = ease(k);
+          const x = lerp(c.p._sx ?? (c.p._sx = c.p._x), c.sp[0], e);
+          const jump = k < 1 ? 0 : Math.abs(Math.sin(t * c.sp2 + c.ph)) * 18;
+          const rot = k < 1 ? 0 : Math.sin(t * c.sp2 + c.ph) * 10;
+          c.p.setAttribute("transform", `translate(${x} ${c.sp[1] - jump}) rotate(${rot})`);
+          if (t > c.next && balls.length < 22) { // 방망이와 공을 던진다
+            c.next = t + R(0.3, 0.8);
+            balls.push({ el: Math.random() < 0.5 ? mkBat() : mkBall(), sx: c.sp[0], sy: c.sp[1] - 30, tx: R(20, 380), ty: R(20, 190), H: R(70, 140), t, d: R(0.9, 1.7), spin: R(540, 1620) * (Math.random() < 0.5 ? 1 : -1) });
+          }
+        });
+        for (let b = balls.length - 1; b >= 0; b--) {
+          const q = balls[b], u = (t - q.t) / q.d;
+          if (u >= 1) { q.el.remove(); balls.splice(b, 1); continue; }
+          q.el.setAttribute("transform", `translate(${lerp(q.sx, q.tx, u)} ${lerp(q.sy, q.ty, u) - Math.sin(Math.PI * u) * q.H}) rotate(${u * q.spin})`);
+        }
+        if (t > 0.9) {
+          flyers.forEach((f) => {
+            const x = f.cx + 165 * Math.sin(f.a * t + f.ph), y = f.cy + 125 * Math.sin(f.b * t + f.q);
+            f.p.setAttribute("transform", `translate(${x} ${y}) rotate(${(t * 260 * f.sgn) % 360})`);
+          });
+          const dt = Math.max(0, t - last); last = t;
+          seg.t += dt / 1.3;
+          if (seg.t >= 1) { seg.t = 0; seg.i = seg.j; let nj; do { nj = Math.floor(Math.random() * spots.length); } while (nj === seg.i); seg.j = nj; }
+          const a = spots[seg.i], b2 = spots[seg.j], u = seg.t;
+          star.setAttribute("transform", `translate(${lerp(a[0], b2[0], u)} ${lerp(a[1], b2[1], u) - Math.sin(Math.PI * u) * 250}) rotate(${u * 720 * (seg.j % 2 ? 1 : -1)})`);
+        }
+        cheers.forEach((c) => { // 치어리더 등장 + 응원
+          const k = Math.min(1, Math.max(0, (t - 0.8) / 0.8)), e = ease(k);
+          const x = lerp(c.from, c.sp[0], e);
+          const w = t * 9 + c.ph, jump = k < 1 ? 0 : Math.abs(Math.sin(w)) * 12, sway = k < 1 ? 0 : Math.sin(w) * 8;
+          c.e.setAttribute("transform", `translate(${x} ${c.sp[1] - jump}) rotate(${sway})`);
+          c.e._pl.setAttribute("transform", `translate(-13 ${-30 + Math.sin(w * 2) * 8}) rotate(${Math.sin(w * 2) * 30})`);
+          c.e._pr.setAttribute("transform", `translate(13 ${-30 + Math.cos(w * 2) * 8}) rotate(${Math.cos(w * 2) * 30})`);
+        });
+        requestAnimationFrame(loop);
+      })(t0);
+    }
+
     async function finish(id, n, label) {
+      if (info.kind === "hr" && info.runners.length === 3) celebrate(id);
       const win = n > 0 ? `+${n}점` : "결승타";
       say(`<b>${info.name}</b> · ${label}<br><span class="pm-big">${n > 0 ? "🎉 " + win : "🏁 결승타"}</span>`);
       await sleep(100);

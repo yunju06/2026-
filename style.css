@@ -234,3 +234,39 @@ tr.subrow td { background: #fcfcfe; }
 .cal-body.slide-r { animation: calSlideR .28s ease-out; }
 @keyframes calSlideL { from { transform: translateX(40px); opacity: .2; } to { transform: none; opacity: 1; } }
 @keyframes calSlideR { from { transform: translateX(-40px); opacity: .2; } to { transform: none; opacity: 1; } }
+
+/* ===== 만루홈런 대축제 ===== */
+.gs { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.gs-flash { position: absolute; inset: 0; background: #fff; animation: gsflash .9s ease-out forwards; }
+@keyframes gsflash { 0% { opacity: 1; } 100% { opacity: 0; } }
+.gs-strobe, .gs-strobe2 { position: absolute; inset: 0; mix-blend-mode: screen; opacity: 0; }
+.gs-strobe { animation: gsstrobe .6s steps(1) .6s 14 both; }
+.gs-strobe2 { animation: gsstrobe .37s steps(1) 1.1s 18 both reverse; }
+@keyframes gsstrobe {
+  0% { background: rgba(255,40,80,.5); opacity: 1; } 16% { opacity: 0; }
+  20% { background: rgba(255,230,0,.5); opacity: 1; } 36% { opacity: 0; }
+  40% { background: rgba(0,220,255,.5); opacity: 1; } 56% { opacity: 0; }
+  60% { background: rgba(190,60,255,.5); opacity: 1; } 76% { opacity: 0; }
+  80% { background: rgba(255,255,255,.6); opacity: 1; } 92% { opacity: 0; }
+}
+.gs-sp { position: absolute; animation: gstwinkle .9s ease-in-out infinite; }
+@keyframes gstwinkle { 0%, 100% { transform: scale(.2) rotate(0); opacity: 0; } 50% { transform: scale(1.4) rotate(90deg); opacity: 1; } }
+.gs-fw { position: absolute; width: 0; height: 0; }
+.gs-fw i { position: absolute; left: -3px; top: -3px; width: 7px; height: 7px; border-radius: 50%; opacity: 0; box-shadow: 0 0 10px 1px currentColor; animation: gsburst 1.3s ease-out infinite; }
+@keyframes gsburst { 0% { transform: translate(0,0) scale(1.5); opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(var(--dx), calc(var(--dy) + 24px)) scale(.2); opacity: 0; } }
+.gs-fly { position: absolute; animation: gsfly linear infinite; }
+@keyframes gsfly { 0% { left: var(--x0); top: var(--y0); transform: rotate(0); } 100% { left: var(--x1); top: var(--y1); transform: rotate(var(--r)); } }
+.gs-c { position: absolute; top: -40px; animation: gsfall linear infinite; }
+@keyframes gsfall { 0% { transform: translateY(0) rotate(0); } 100% { transform: translateY(560px) rotate(720deg); } }
+.gs-fire { position: absolute; left: 0; right: 0; bottom: -6px; display: flex; justify-content: space-around; font-size: 30px; }
+.gs-fire span { animation: gsflame .45s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+@keyframes gsflame { from { transform: scale(.8, .9); } to { transform: scale(1.3, 1.6); } }
+.gs-t { position: absolute; left: 50%; top: 28%; transform: translate(-50%, -50%); white-space: nowrap; text-align: center; font-size: clamp(28px, 9.5vw, 56px); font-weight: 900; color: #ffd400; -webkit-text-stroke: 3px #c4002f; paint-order: stroke fill; text-shadow: 0 5px 18px rgba(0,0,0,.7); animation: gspop .7s cubic-bezier(.2,1.6,.4,1) both, gspulse .6s .7s ease-in-out infinite, gshue 1.4s linear infinite; }
+.gs-side { display: inline-block; animation: gsspin 1.2s linear infinite; -webkit-text-stroke: 0; }
+@keyframes gsspin { to { transform: rotate(360deg) scale(1.15); } }
+.gs-t small { display: block; font-size: 17px; color: #fff; -webkit-text-stroke: 0; text-shadow: 0 2px 8px #000; margin-top: 4px; }
+@keyframes gspop { 0% { transform: translate(-50%, -50%) scale(0) rotate(-14deg); } 100% { transform: translate(-50%, -50%) scale(1) rotate(0); } }
+@keyframes gspulse { 50% { transform: translate(-50%, -50%) scale(1.15) rotate(-2deg); } }
+@keyframes gshue { 100% { filter: hue-rotate(360deg); } }
+.gs-white { position: absolute; inset: 0; background: #fff; opacity: 0; animation: gswhite .32s steps(1) .5s infinite; }
+@keyframes gswhite { 0% { opacity: .55; } 25% { opacity: 0; } 50% { opacity: .35; } 62% { opacity: 0; } 100% { opacity: 0; } }
