@@ -224,3 +224,6 @@ tr.subrow td { background: #fcfcfe; }
 
 .play-text { text-align: center; font-size: 14px; line-height: 1.6; color: #14182b; padding: 4px 6px; }
 .play-text small { color: #888; }
+
+.play-hide { position: absolute; right: 8px; top: 8px; background: rgba(0,0,0,.6); color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; cursor: pointer; z-index: 2; }
+.play-hide:hover { background: rgba(0,0,0,.85); }

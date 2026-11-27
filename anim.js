@@ -107,7 +107,9 @@
     const side = findSide(g, info.name);
     const bat = TEAMS()[g[side]], fld = TEAMS()[g[side === "home" ? "away" : "home"]];
     const player = (g.batters[side] || []).find((b) => b.name === info.name);
-    const avg = player && player.avg != null ? player.avg.toFixed(3).replace(/^0/, "") : "-";
+    const lastAvg = (window.LAST_AVG || {})[g[side] + ":" + info.name]; // 선수의 마지막 경기 시즌 타율
+    const avgV = lastAvg != null ? lastAvg : player && player.avg != null ? player.avg : null;
+    const avg = avgV == null ? "-" : avgV.toFixed(3).replace(/^0/, "");
     const runnersText = info.runners.length === 3 ? "만루" : info.runners.length ? info.runners.join(",") + "루" : "주자 없음";
     const cnt = (label, max, on, cls) => `<span class="cn"><i>${label}</i>${Array.from({ length: max }, (_, k) => `<u class="${cls}${k < on ? " on" : ""}"></u>`).join("")}</span>`;
 
@@ -140,6 +142,7 @@
             <div class="pi-top"><b>${info.inning ? info.inning + "회" : "결승타"}</b> <span>${runnersText}</span></div>
             <div class="pi-cnt">${cnt("B", 3, info.kind === "bb" ? 3 : 0, "b")}${cnt("S", 2, 0, "s")}${cnt("O", 2, info.outs, "o")}</div>
           </div>
+          <button type="button" class="play-hide">숨기기 ✕</button>
           <div class="play-msg" hidden></div>
           <div class="play-who">
             <div class="pp-team"><span class="pp-dot" style="background:${bat.color}"></span>${bat.name}</div>
@@ -347,6 +350,7 @@
         const h = document.createElement("div"); h.className = "pm-hint"; h.textContent = "↻ 다시 보려면 화면을 누르세요"; msg.appendChild(h);
       }
     }
+    stage.querySelector(".play-hide").addEventListener("click", (e) => { e.stopPropagation(); reset(); });
     for (const el of [intro, stage]) {
       el.addEventListener("click", start);
       el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); start(); } });

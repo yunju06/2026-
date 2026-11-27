@@ -202,7 +202,11 @@
       const seen = new Set();
       const isSub = bs.map((b) => (seen.has(b.order) ? true : (seen.add(b.order), false))); // 같은 타순의 두 번째부터 교체 출전
       const sum = (k) => bs.reduce((a, b) => a + b[k], 0);
-      const avg = (b) => (b.avg == null ? "-" : b.avg.toFixed(3).replace(/^0/, ""));
+      const avg = (b) => { // 마지막 경기 기준 시즌 타율로 통일
+        const v = (window.LAST_AVG || {})[g[side] + ":" + b.name];
+        const x = v != null ? v : b.avg;
+        return x == null ? "-" : x.toFixed(3).replace(/^0/, "");
+      };
       const NI = Math.max(9, ...bs.map((b) => b.inn.length));
       const innTh = Array.from({ length: NI }, (_, i) => `<th class="ir">${i + 1}</th>`).join("");
       const innTd = (b) => Array.from({ length: NI }, (_, i) => `<td class="ir">${b.inn[i] || ""}</td>`).join("");
