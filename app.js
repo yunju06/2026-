@@ -175,11 +175,14 @@
         </tbody></table>
       </div>`;
     $("page0").innerHTML = `
+      <div id="playBox"></div>
       <div class="card"><h3>이닝별 스코어</h3><div class="tbl-wrap"><table class="score-tbl">
         <thead><tr><th>팀</th>${innHead}<th>R</th><th>H</th><th>E</th><th>B</th></tr></thead>
         <tbody>${row("away")}${row("home")}</tbody></table></div></div>
       <h3 style="margin:14px 2px 8px">라인업</h3>
       <div class="lineups">${lineup("away")}${lineup("home")}</div>`;
+
+    if (window.PlayAnim) PlayAnim.mount($("playBox"), g);
 
     // 페이지 1 : 선수 기록 (팀 선택)
     mountRecords($("page1"), g);
