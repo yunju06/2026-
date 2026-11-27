@@ -166,6 +166,7 @@
     let ball, shadow, batter, batG, fielders, runners;
     function setup() {
       layer.innerHTML = "";
+      stage.querySelectorAll(".gs").forEach((e) => e.remove());
       msg.hidden = true;
       fielders = {};
       for (const k in FIELDERS) { const p = add(person(fld.color, 0.95)); place(p, ...FIELDERS[k]); fielders[k] = p; }
@@ -249,7 +250,7 @@
       // 안타는 수비가 못 잡는 곳에 떨어짐: 수비수 바로 위면 그 앞(홈 쪽)으로 짧게 떨어뜨린다
       if (isHit) {
         const nf = FIELDERS[nearest(land)];
-        if (dist(nf, land) < 46) land = [lerp(nf[0], BASE[0][0], 0.3), lerp(nf[1], BASE[0][1], 0.3)];
+        if (!/중전/.test(info.detail) && dist(nf, land) < 46) land = [lerp(nf[0], BASE[0][0], 0.3), lerp(nf[1], BASE[0][1], 0.3)];
       }
       let adv = []; // [주자, 도착 베이스]
       let batterTo = 1, batterOut = false;
