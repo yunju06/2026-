@@ -85,7 +85,7 @@
     const player = (g.batters[side] || []).find((b) => b.name === info.name);
     const avg = player && player.avg != null ? player.avg.toFixed(3).replace(/^0/, "") : "-";
     const runnersText = info.runners.length === 3 ? "만루" : info.runners.length ? info.runners.join(",") + "루" : "주자 없음";
-    const outsText = "●".repeat(info.outs) + "○".repeat(2 - info.outs);
+    const cnt = (label, max, on, cls) => `<span class="cn"><i>${label}</i>${Array.from({ length: max }, (_, k) => `<u class="${cls}${k < on ? " on" : ""}"></u>`).join("")}</span>`;
 
     box.innerHTML = `
       <div class="card play-card">
@@ -112,7 +112,10 @@
             </g>
             <g id="layer"></g>
           </svg>
-          <div class="play-info"><b>${info.inning ? info.inning + "회" : "결승타"}</b> <span>${outsText}</span> <span>${runnersText}</span></div>
+          <div class="play-info">
+            <div class="pi-top"><b>${info.inning ? info.inning + "회" : "결승타"}</b> <span>${runnersText}</span></div>
+            <div class="pi-cnt">${cnt("B", 3, info.kind === "bb" ? 3 : 0, "b")}${cnt("S", 2, 0, "s")}${cnt("O", 2, info.outs, "o")}</div>
+          </div>
           <div class="play-msg" hidden></div>
           <div class="play-who">
             <div class="pp-team"><span class="pp-dot" style="background:${bat.color}"></span>${bat.name}</div>
@@ -178,15 +181,15 @@
       batG._ang = -35; setBat(-35);
       shadow = add(document.createElementNS(NS, "ellipse"));
       shadow.setAttribute("rx", 4); shadow.setAttribute("ry", 1.6); shadow.setAttribute("fill", "rgba(0,0,0,.35)"); shadow.setAttribute("opacity", 0);
-      ball = add(document.createElementNS(NS, "text"));
-      ball.setAttribute("font-size", 12); ball.setAttribute("text-anchor", "middle"); ball.textContent = "⚾";
+      ball = add(document.createElementNS(NS, "g"));
+      ball.innerHTML = `<circle r="11" fill="rgba(255,235,0,.5)"/><circle r="6.5" fill="#fff" stroke="#111" stroke-width="1.6"/>
+        <path d="M-3.6 -4.6 Q0 0 -3.6 4.6 M3.6 -4.6 Q0 0 3.6 4.6" fill="none" stroke="#e5143a" stroke-width="1.5" stroke-linecap="round"/>`;
       setBall(MOUND[0], MOUND[1] - 20, 0);
     }
     function setBat(a) { batG._ang = a; batG.setAttribute("transform", `translate(${BOX[0] + 8} ${BOX[1] - 16}) rotate(${a})`); }
     function setBall(x, y, h) {
       ball._x = x; ball._y = y;
-      ball.setAttribute("x", x); ball.setAttribute("y", y - h + 4);
-      ball.setAttribute("font-size", 12 + h / 14);
+      ball.setAttribute("transform", `translate(${x} ${y - h - 3}) scale(${info.kind === "hr" ? 1 + h / 70 : 1})`);
       shadow.setAttribute("cx", x); shadow.setAttribute("cy", y + 3); shadow.setAttribute("opacity", h > 2 ? 0.5 : 0);
     }
     function flyBall(id, to, ms, H) {
@@ -239,8 +242,15 @@
       await Promise.all([pitch, swing]);
       floatText(id, kind === "hr" ? "💥" : "✨", 204, 276, "#fff", 22);
 
-      const land = kind === "hr" ? info.hrTarget || HR_TARGET["중월"] : info.land || (kind === "gb" || kind === "bunt" ? FIELDERS.SS : [200, 128]);
+      let land = kind === "hr" ? info.hrTarget || HR_TARGET["중월"] : info.land || (kind === "gb" || kind === "bunt" ? FIELDERS.SS : [200, 128]);
       const ground = kind === "bunt" || kind === "gb" || (kind === "1b" && info.infield);
+      const isOut = kind === "sf" || kind === "fo";
+      const isHit = !isOut && !ground && kind !== "hr";
+      // 안타는 수비가 못 잡는 곳에 떨어짐: 수비수 바로 위면 그 앞(홈 쪽)으로 짧게 떨어뜨린다
+      if (isHit) {
+        const nf = FIELDERS[nearest(land)];
+        if (dist(nf, land) < 46) land = [lerp(nf[0], BASE[0][0], 0.3), lerp(nf[1], BASE[0][1], 0.3)];
+      }
       let adv = []; // [주자, 도착 베이스]
       let batterTo = 1, batterOut = false;
       if (kind === "hr") { batterTo = 4; adv = runners.map((r) => [r, 4]); }
@@ -253,7 +263,12 @@
 
       // 타구 + 수비수 움직임
       const fk = nearest(land);
-      const chase = ground ? Promise.resolve() : moveTo(id, fielders[fk], land[0], land[1], kind === "hr" ? 900 : 1000);
+      let chase = Promise.resolve();
+      if (isOut) chase = moveTo(id, fielders[fk], land[0], land[1], 1000); // 뜬공은 잡는다
+      else if (isHit) { // 안타: 절반쯤 쫓아가다 놓치고, 떨어진 뒤에 공을 줍는다
+        const f = FIELDERS[fk];
+        chase = moveTo(id, fielders[fk], lerp(f[0], land[0], 0.5), lerp(f[1], land[1], 0.5), 1000);
+      }
       let ballFlight;
       if (ground) ballFlight = rollBall(id, kind === "bunt" ? [land[0], Math.max(land[1], 262)] : land, kind === "bunt" ? 650 : 750);
       else if (kind === "hr") ballFlight = flyBall(id, land, 1300, 130);
@@ -273,6 +288,7 @@
       batG.setAttribute("opacity", 1);
       sleep(120).then(() => setBat(115)).catch(() => {});
       await Promise.all([ballFlight, chase]);
+      if (isHit) movers.push(moveTo(id, fielders[fk], land[0], land[1], 600));
       if (batterOut) {
         if (ground) {
           // 1루로 송구
@@ -296,7 +312,7 @@
     function reset() { run++; playing = false; finished = false; setup(); stage.hidden = true; intro.hidden = false; }
     async function start() {
       if (playing) return;
-      if (finished) { reset(); return; }
+      if (finished) { run++; finished = false; setup(); }
       playing = true;
       intro.hidden = true; stage.hidden = false;
       const id = ++run;
