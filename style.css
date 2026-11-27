@@ -227,3 +227,10 @@ tr.subrow td { background: #fcfcfe; }
 
 .play-hide { position: absolute; right: 8px; top: 8px; background: rgba(0,0,0,.6); color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; cursor: pointer; z-index: 2; }
 .play-hide:hover { background: rgba(0,0,0,.85); }
+
+/* 달력 밀어서 넘기기: 가로 제스처를 브라우저가 가로채지 않도록 + 슬라이드 효과 */
+#calendarView { touch-action: pan-y; }
+.cal-body.slide-l { animation: calSlideL .28s ease-out; }
+.cal-body.slide-r { animation: calSlideR .28s ease-out; }
+@keyframes calSlideL { from { transform: translateX(40px); opacity: .2; } to { transform: none; opacity: 1; } }
+@keyframes calSlideR { from { transform: translateX(-40px); opacity: .2; } to { transform: none; opacity: 1; } }

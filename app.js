@@ -124,19 +124,32 @@
       : "이달 예정된 경기";
   }
 
-  $("prevMonth").onclick = () => { curM--; renderCalendar(); };
-  $("nextMonth").onclick = () => { curM++; renderCalendar(); };
+  $("prevMonth").onclick = () => goMonth(-1);
+  $("nextMonth").onclick = () => goMonth(1);
   // 달력도 좌우로 밀거나 ← → 키로 달을 넘김
-  const goMonth = (d) => { const n = curM + d; if (n < minM || n > maxM) return; curM = n; renderCalendar(); };
+  const goMonth = (d) => {
+    const n = curM + d;
+    if (n < minM || n > maxM) return;
+    curM = n; renderCalendar();
+    const b = $("calGrid"); // 밀리는 방향으로 슬라이드 효과
+    b.classList.remove("slide-l", "slide-r"); void b.offsetWidth;
+    b.classList.add(d > 0 ? "slide-l" : "slide-r");
+  };
+  // 폰(터치)은 touch 이벤트, 마우스는 pointer 이벤트로 처리 (폰 브라우저가 pointer 제스처를 가로채는 경우 대비)
   let swipe = null;
-  $("calendarView").addEventListener("pointerdown", (e) => { swipe = { x: e.clientX, y: e.clientY }; });
-  $("calendarView").addEventListener("pointerup", (e) => {
+  const swStart = (x, y) => { swipe = { x, y }; };
+  const swEnd = (x, y) => {
     if (!swipe) return;
-    const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+    const dx = x - swipe.x, dy = y - swipe.y;
     swipe = null;
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) goMonth(dx < 0 ? 1 : -1); // 왼쪽으로 밀면 다음 달
-  });
-  $("calendarView").addEventListener("pointercancel", () => { swipe = null; });
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) goMonth(dx < 0 ? 1 : -1); // 왼쪽으로 밀면 다음 달
+  };
+  const cv = $("calendarView");
+  cv.addEventListener("touchstart", (e) => { const t = e.touches[0]; swStart(t.clientX, t.clientY); }, { passive: true });
+  cv.addEventListener("touchend", (e) => { const t = e.changedTouches[0]; swEnd(t.clientX, t.clientY); }, { passive: true });
+  cv.addEventListener("touchcancel", () => { swipe = null; }, { passive: true });
+  cv.addEventListener("pointerdown", (e) => { if (e.pointerType === "mouse") swStart(e.clientX, e.clientY); });
+  cv.addEventListener("pointerup", (e) => { if (e.pointerType === "mouse") swEnd(e.clientX, e.clientY); });
   document.addEventListener("keydown", (e) => {
     if ($("calendarView").hidden || e.target.closest("input,textarea,select")) return;
     if (e.key === "ArrowRight") goMonth(1);
