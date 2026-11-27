@@ -126,6 +126,22 @@
 
   $("prevMonth").onclick = () => { curM--; renderCalendar(); };
   $("nextMonth").onclick = () => { curM++; renderCalendar(); };
+  // 달력도 좌우로 밀거나 ← → 키로 달을 넘김
+  const goMonth = (d) => { const n = curM + d; if (n < minM || n > maxM) return; curM = n; renderCalendar(); };
+  let swipe = null;
+  $("calendarView").addEventListener("pointerdown", (e) => { swipe = { x: e.clientX, y: e.clientY }; });
+  $("calendarView").addEventListener("pointerup", (e) => {
+    if (!swipe) return;
+    const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+    swipe = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) goMonth(dx < 0 ? 1 : -1); // 왼쪽으로 밀면 다음 달
+  });
+  $("calendarView").addEventListener("pointercancel", () => { swipe = null; });
+  document.addEventListener("keydown", (e) => {
+    if ($("calendarView").hidden || e.target.closest("input,textarea,select")) return;
+    if (e.key === "ArrowRight") goMonth(1);
+    if (e.key === "ArrowLeft") goMonth(-1);
+  });
   $("calGrid").addEventListener("click", (e) => {
     const c = e.target.closest(".cell.game");
     if (c) location.hash = "#/game/" + c.dataset.id;
@@ -338,8 +354,7 @@
     const gm = h.match(/^#\/game\/(.+)$/);
     const am = h.match(/^#\/attend(?:\/(.+))?$/);
     const g = gm && GAMES.find((x) => x.id === decodeURIComponent(gm[1]));
-    const isCal = h === "#/calendar" || (gm && !g);
-    const view = g ? "game" : isCal ? "calendar" : "attend"; // 기본(첫 화면)은 직관 페이지
+    const view = g ? "game" : am ? "attend" : "calendar"; // 기본(첫 화면)은 달력
     $("calendarView").hidden = view !== "calendar";
     $("gameView").hidden = view !== "game";
     $("attendView").hidden = view !== "attend";
